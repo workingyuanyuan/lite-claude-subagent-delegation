@@ -1,6 +1,10 @@
 # Machine-local Claude Code settings
 .claude/settings.local.json
 
+# Local reference copy of the Codex-side policy
+AGENTS.md
+AGENTS-ref.md
+
 # Local task contracts and worktrees
 .claude-tasks/
 .worktrees/

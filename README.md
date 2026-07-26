@@ -13,7 +13,7 @@ versions/opus/
    └─ Invoke-AntigravityAgent.ps1
 ```
 
-版號目錄名稱代表支援的 Claude 世代，並非專案發布版號。專案保留了 `AGENTS.md` 作為對應 OpenAI Codex 版策略的上游鏡像。
+版號目錄名稱代表支援的 Claude 世代，並非專案發布版號。
 
 ## 需求
 
@@ -120,3 +120,8 @@ Get-Item -LiteralPath "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" -Strea
 
 - [`versions/opus/CLAUDE.md`](versions/opus/CLAUDE.md)：完整編排策略與模型能力表。
 - [`docs/routing-policy.md`](docs/routing-policy.md)：路由政策展開參考（英文）。
+- [codex-gemini-orchestrator](https://github.com/workingyuanyuan/codex-gemini-orchestrator)：本專案的姊妹專案，同一套委派機制的 OpenAI Codex 版本。
+
+## 授權
+
+本專案採用 [MIT License](LICENSE)。
