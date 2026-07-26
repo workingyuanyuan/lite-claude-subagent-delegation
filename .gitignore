@@ -1,1 +1,33 @@
+# Machine-local Claude Code settings
 .claude/settings.local.json
+
+# Local task contracts and worktrees
+.claude-tasks/
+.worktrees/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+*.p12
+*.cer
+*.crt
+
+# Logs and temporary output
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+Desktop.ini
