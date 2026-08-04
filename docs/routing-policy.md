@@ -2,145 +2,79 @@
 
 ## 1. Scope and Precedence
 
-- `CLAUDE.md` is the authoritative single source of truth for all routing, delegation, capability scoring, and isolation policies.
-- This document (`docs/routing-policy.md`) expands and operationalizes `CLAUDE.md` into actionable rules for operators.
-- This document must never contradict `CLAUDE.md`. In any conflict or ambiguity between this document and `CLAUDE.md`, `CLAUDE.md` strictly governs.
+- The `antigravity-delegation-gemini36` skill (`versions/opus-5/skills/antigravity-delegation-gemini36/SKILL.md`) is the authoritative source of truth for routing, delegation, capability scoring, and isolation policy.
+- `CLAUDE.md` holds only the trigger rule that tells the orchestrator when to load that skill. It deliberately contains no policy detail.
+- This document expands the skill into operator-facing notes. It must never contradict the skill; in any conflict, the skill governs.
 
 ## 2. Decision Procedure
 
-Operators must execute the following 5-step decision procedure sequentially for every candidate task:
-
-1. **Step 1: Determine Delegation Warrant**
-   - **What is decided**: Whether to delegate the task to a Gemini worker or keep it in the Claude Code orchestrator.
-   - **Criterion**: The task must be separable, bounded, and objectively verifiable, and delegation must provide a clear benefit in model fit, parallelism, token availability, or context isolation.
-   - **Branch — Keep in Orchestrator**: If the task is trivial, tightly coupled, cheaper to complete directly, or involves orchestrator-reserved responsibilities (architecture, design, shared contracts, integration, review, final acceptance), the operator must keep the work in the orchestrator.
-   - **Branch — Delegate**: If all delegation criteria are met, proceed to Step 2.
-
-2. **Step 2: Verify Technical Preconditions**
-   - **What is decided**: Whether the execution environment supports worker invocation.
-   - **Criterion**: All five enforced preconditions must hold:
-     1. `agy` (Antigravity CLI) is installed on `PATH` and authenticated against the user's subscription session.
-     2. PowerShell 7+ (`#requires -Version 7.0`) is available.
-     3. Wrapper script `$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1` exists.
-     4. Target `$WorkingDirectory` is a valid directory and is a Git worktree root (`git rev-parse --is-inside-work-tree` returns `true` and `rev-parse --show-toplevel` matches `$WorkingDirectory`).
-     5. Task contract file (`-PromptFile`) exists, is a leaf file, is non-empty, and contains valid UTF-8.
-   - **Branch — Keep in Orchestrator**: If any precondition fails, the operator must not delegate; execute the work in the orchestrator and log the specific failure reason.
-   - **Branch — Proceed**: If all preconditions hold, proceed to Step 3.
-
-3. **Step 3: Evaluate Capability Threshold**
-   - **What is decided**: Which worker models meet the required capability threshold and quality bar for the task.
-   - **Criterion**: Assess task requirements against model capabilities and domain profiles:
-     - `gemini-3.6-flash`: Qualified for bounded implementation, repetitive edits, migrations, frontend/UI, documentation/copy, data transformation, and straightforward coding.
-     - `gemini-3.1-pro`: Qualified for dense specifications, instruction- or language-heavy work, and difficult quantitative work.
-   - **Branch — Keep in Orchestrator**: If no Gemini model meets the required capability threshold, the operator must keep the task in the orchestrator.
-   - **Branch — Proceed**: If one or more models qualify, proceed to Step 4.
-
-4. **Step 4: Select Model by Cost Efficiency**
-   - **What is decided**: Which qualified worker model to select for primary execution.
-   - **Criterion**: Prefer the qualified model with the higher Cost Efficiency score (`gemini-3.6-flash` at 8.8 vs `gemini-3.1-pro` at 8.7). Intelligence (composite score) must be used as a secondary signal only when task-specific fit remains unclear.
-   - **Branch — Select Gemini 3.6 Flash**: Select `gemini-3.6-flash` for straightforward coding, UI, copy, migrations, data transformation, or repetitive edits.
-   - **Branch — Select Gemini 3.1 Pro**: Select `gemini-3.1-pro` when the task requires dense spec comprehension, instruction/language intensity, or complex math/quantitative work.
-   - **Proceed**: Once the model is selected, proceed to Step 5.
-
-5. **Step 5: Determine Isolation Mode and Execution Parameters**
-   - **What is decided**: Worktree creation, approval flags (`-AutoApprove`), execution mode, and concurrency limits.
-   - **Criterion**: Classify task mutation scope (read-only analysis vs bounded write vs shared contracts/architectural).
-   - **Branch — Read-Only Analysis**: Pass repository root as `$WorkingDirectory`, omit `-AutoApprove`, execute in background (`run_in_background: true`), and parallelize with other independent read-heavy tasks.
-   - **Branch — Bounded Write**: Create detached Git worktree (`git worktree add --detach <path> HEAD`), pass `-AutoApprove` (only if authorized by task contract for local writes), set `$WorkingDirectory` to worktree root, execute in background (`run_in_background: true`).
-   - **Branch — Shared Contracts / Architectural**: Must serialize execution (no parallel writes permitted). If work touches core architecture, retain in orchestrator.
+1. **Determine delegation warrant.** The task must be separable, bounded, and objectively verifiable, and delegation must improve model fit, parallelism, token availability, or context isolation. Keep the work in the orchestrator when it is trivial, tightly coupled, cheaper to finish directly, or falls under an orchestrator reservation (Section 3).
+2. **Verify preconditions.** `agy` is on `PATH` and authenticated; PowerShell 7+ is available; the wrapper exists at `$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1`; `-WorkingDirectory` resolves to a Git worktree root; `-PromptFile` is a non-empty, valid UTF-8 file. The wrapper enforces all of these and throws otherwise.
+3. **Evaluate the capability threshold.** Determine which models are likely to meet the acceptance bar for this specific task, using the capability table in Section 4.
+4. **Select by Cost Efficiency among qualified models.** Prefer the highest Cost Efficiency that clears the threshold. Use Intelligence only when task-specific fit is unclear.
+5. **Choose the isolation mode.** Read-only tasks take the repository root with no `-AutoApprove`. Write tasks take a dedicated detached worktree. Work touching shared contracts is serialized or kept in the orchestrator. Always invoke with `run_in_background: true`.
 
 ## 3. Orchestrator Reservations and Disqualifiers
 
-### Orchestrator Reservations
-The orchestrator strictly retains exclusive ownership of the following work classes:
-1. **Architecture**: System architecture, structural design, and technical strategy.
-2. **Design**: Component boundaries, module contracts, and high-level interface definitions.
-3. **Shared Contracts**: Common schemas, public API definitions, shared protocols, dependency manifests, and global configuration.
-4. **Integration**: Merging worker diffs, assembling multi-part deliverables, and resolving cross-component interactions.
-5. **Review**: Evaluating worker diffs, verifying contract compliance, and assessing code quality.
-6. **Final Acceptance**: Verifying system behavior against final acceptance criteria and authorizing release or deployment.
+The orchestrator retains architecture, design, shared contracts, integration, review, and final acceptance.
 
-### Delegation Disqualifiers
-The operator must not delegate work under any of the following three disqualifying conditions:
-1. **Trivial Work**: Tasks so small or simple that contract creation and delegation overhead exceed the effort to complete them directly.
-2. **Tightly Coupled Work**: Tasks that cannot be isolated into a self-contained worktree or contract without touching broad system dependencies.
-3. **Work Cheaper to Complete Directly**: Tasks where context transfer, contract authoring, or worktree management cost more time or tokens than direct orchestrator execution.
+This is grounded in the capability table, not preference alone: the orchestrator leads every worker on Agentic. Work requiring sustained autonomous multi-step decisions, open-ended exploration, or judgement that evolves as the task unfolds therefore stays in the orchestrator regardless of Cost Efficiency.
 
-## 4. Per-Model Routing Profiles
+The converse also follows from the table. The orchestrator has the lowest Cost Efficiency of any row, so its capacity is the scarcest resource in the system. Bounded work that a worker can complete should be delegated rather than absorbed, because absorbing it spends the most expensive capacity available.
 
-### Gemini 3.6 Flash
-- **Model Alias**: `gemini-3.6-flash`
-- **Resolved Antigravity Slug**: `gemini-3.6-flash-high`
-- **Routed Work Classes**:
-  - Bounded, objectively verifiable implementation
-  - Repetitive edits
-  - Migrations
-  - Frontend/UI
-  - Documentation and copy
-  - Data transformation
-  - Straightforward coding
-- **Move-Off Signals**:
-  - Task involves dense specifications or complex multi-document requirements.
-  - Task requires instruction-heavy or language-heavy nuance beyond standard implementation.
-  - Task involves difficult quantitative or mathematical modeling.
-  - Worker fails to satisfy acceptance criteria after one targeted repair attempt.
+Do not delegate work that is trivial (delegation overhead exceeds the work), tightly coupled (cannot be isolated into a worktree and a self-contained contract), or cheaper to complete directly.
 
-### Gemini 3.1 Pro
-- **Model Alias**: `gemini-3.1-pro`
-- **Resolved Antigravity Slug**: `gemini-3.1-pro-high`
-- **Routed Work Classes**:
-  - Dense specifications
-  - Instruction- or language-heavy work
-  - Difficult quantitative work suitable for an external worker
-- **Move-Off Signals**:
-  - Task is straightforward coding or repetitive editing where `gemini-3.6-flash` meets the capability threshold (prefer higher Cost Efficiency).
-  - Task requires architectural decisions, shared contract edits, or final integration reserved for the orchestrator.
+## 4. Model Profiles
 
-### Model Capability Reference Table
+Scores are routing estimates on a 0–100 scale; higher is better. Cost Efficiency reflects the user's subscription-adjusted cost, and Intelligence is only a secondary composite signal.
 
-All listed profiles use high reasoning effort. Scores are routing estimates; higher is better. Cost Efficiency reflects the user's subscription-adjusted cost, and Intelligence is only a secondary composite signal.
+| Model            | Role                | Cost Eff. | Intelligence | Reasoning | Coding | Agentic | Math | Data | Language | Instruction |
+| ---------------- | ------------------- | --------- | ------------ | --------- | ------ | ------- | ---- | ---- | -------- | ----------- |
+| Opus 5           | Orchestrator (self) | 30        | 80           | 91        | 81     | 62      | 95   | 74   | 88       | 63          |
+| Opus 4.6         | Worker              | 60        | 74           | 88        | 78     | 49      | 89   | 70   | 83       | 63          |
+| Gemini 3.1 Pro   | Worker              | 86        | 77           | 85        | 76     | 45      | 91   | 78   | 85       | 79          |
+| Gemini 3.6 Flash | Worker — default    | 88        | 75           | 82        | 78     | 49      | 88   | 65   | 85       | 75          |
 
-| Model            | Cost Eff. | Intelligence | Reasoning | Coding | Agentic | Math | Data | Language | Instruction |
-| ---------------- | --------- | ------------ | --------- | ------ | ------- | ---- | ---- | -------- | ----------- |
-| Gemini 3.1 Pro   | 8.7       | 7.7          | 8.5       | 7.6    | 4.5     | 9.1  | 7.8  | 8.5      | 7.9         |
-| Gemini 3.6 Flash | 8.8       | 7.5          | 8.2       | 7.8    | 4.9     | 8.8  | 6.5  | 8.5      | 7.5         |
+The Opus 5 row is a reference baseline describing the orchestrator itself. It has no wrapper alias and cannot be invoked; its purpose is to make the capability cost of delegating explicit rather than assumed.
 
-## 5. Conflict Resolution Rules
+### 4.1 Gemini 3.6 Flash
 
-1. When **higher Cost Efficiency** conflicts with **meeting the required capability threshold**, prefer **meeting the capability threshold**, because Cost Efficiency is evaluated only among qualified models that are likely to achieve the required quality bar.
-2. When **parallel execution efficiency** conflicts with **shared-contract safety**, prefer **serial execution (or keeping work in the orchestrator)**, because work affecting shared contracts, schemas, public interfaces, dependency manifests, global configuration, or architectural decisions requires strict serialization and orchestrator oversight.
-3. When **conducting a second-model review** conflicts with **stopping at the acceptance bar**, prefer **stopping once acceptance criteria are met**, because second-model reviews add token and latency overhead and must not be used unless explicit risk or unresolved uncertainty justifies them.
-4. When **delegation convenience** conflicts with **trivial or tightly coupled tasks**, prefer **keeping work in the orchestrator**, because delegation overhead is justified only when it materially improves model fit, parallelism, token availability, or context isolation.
-5. When **execution speed** conflicts with **worktree isolation for write tasks**, prefer **creating a detached Git worktree**, because write tasks require strict isolation boundaries to allow clean diff review, verification, and rollback without corrupting the main worktree.
+- **Alias / slug:** `gemini-3.6-flash` → `gemini-3.6-flash-high`
+- **Routed work:** default for bounded, objectively verifiable implementation, repetitive edits, migrations, frontend/UI, documentation and copy, data transformation, and straightforward coding.
+- **Move off when:** the task turns on dense specification comprehension or instruction/language nuance (prefer 3.1 Pro), or on reasoning and comprehension depth (prefer Opus 4.6).
 
-## 6. Failure and Escalation Ladder
+### 4.2 Gemini 3.1 Pro
 
-Operators and orchestrators must follow this four-rung escalation ladder in strict order when handling worker task failures. Operators must not skip, reorder, or soften any rung.
+- **Alias / slug:** `gemini-3.1-pro` → `gemini-3.1-pro-high`
+- **Routed work:** dense specifications, instruction- or language-heavy work, and difficult quantitative work suitable for an external worker.
+- **Move off when:** the task is straightforward coding or repetitive editing that 3.6 Flash already handles, since Cost Efficiency then governs.
 
-1. **Rung 1: Contract, Context, and Environment Diagnosis**
-   - **Trigger**: Worker task failure, invalid output, missing required return fields (`summary`, `changed_files`, `validation`, `risks`, `unresolved`), or script wrapper error.
-   - **Action**: Inspect failure logs. Diagnose and fix any incomplete contract, missing repository context, unstated constraints, or environment failure (e.g., path resolution, missing `agy` CLI, UTF-8 encoding). Re-run the task on the original model profile.
-   - **Condition for Advancing**: Contract, context, and environment are verified correct and complete, but the worker still produces failing or incomplete output.
+### 4.3 Claude Opus 4.6
 
-2. **Rung 2: Targeted Repair Attempt**
-   - **Trigger**: Worker failure occurring after contract and environment verification (Rung 1).
-   - **Action**: Make exactly one targeted repair attempt by providing specific failure feedback, error logs, diff corrections, or refined instructions to the same worker model.
-   - **Condition for Advancing**: The single targeted repair attempt fails to produce output satisfying the acceptance criteria.
+- **Alias / slug:** `claude-opus-4-6` → `claude-opus-4-6-thinking`
+- **Slug note:** unlike the Gemini aliases, this slug carries no reasoning-effort suffix; thinking mode is intrinsic. There is no `-high` variant, and `--effort` must not be passed.
+- **Routed work:** tasks whose binding constraint is reasoning or comprehension depth rather than volume — intricate debugging, refactors with subtle invariants, and large cross-file analysis reads. It is also the first escalation target when a Gemini worker fails on capability rather than on contract or context.
+- **Move off when:** a Gemini worker already meets the acceptance bar, since Cost Efficiency then governs. Do not re-run completed work on Opus 4.6 for a marginal improvement.
 
-3. **Rung 3: Switch to Better-Fit Gemini Worker**
-   - **Trigger**: Failure of the single targeted repair attempt on the primary worker model (Rung 2).
-   - **Action**: Switch to the better-fit alternative Gemini worker, selected against the failure mode rather than by rank — neither model dominates the other across the capability table. Issue a fresh task invocation with updated worker specifications.
-   - **Condition for Advancing**: The alternative Gemini worker fails to satisfy the task acceptance criteria upon execution.
+## 5. Conflict Resolution
 
-4. **Rung 4: Return Work to the Orchestrator**
-   - **Trigger**: Failure of the alternative Gemini worker (Rung 3) to satisfy acceptance criteria.
-   - **Action**: Reclaim the task completely. The Claude Code orchestrator executes the work directly, cleans up temporary worktrees, logs the delegation failure reason, and performs final verification.
-   - **Condition for Advancing**: N/A (terminal rung of the escalation ladder).
+1. Meeting the capability threshold beats higher Cost Efficiency; Cost Efficiency is compared only among qualified models.
+2. Shared-contract safety beats parallel throughput — serialize, or keep the work in the orchestrator.
+3. Stopping at the acceptance bar beats an extra second-model review.
+4. Keeping trivial or tightly coupled work in the orchestrator beats delegation convenience.
+5. Worktree isolation for write tasks beats execution speed.
 
-## 7. Isolation Decision Table
+## 6. Failure Handling
 
-| Task Type | Worktree Required | `-AutoApprove` Permitted | Parallelizable |
+1. **Diagnose contract, context, and environment first.** Worker failures, invalid output, missing return fields, and wrapper errors are most often caused by an incomplete contract, missing repository context, an unstated constraint, or an environment problem. Fix the cause and re-run on the same model. Switching models does not repair a bad contract.
+2. **Make one targeted repair attempt.** Supply specific failure feedback, logs, or refined instructions to the same worker. Exactly one attempt.
+3. **Switch to a better-fit worker.** Select against the observed failure mode rather than by rank. If the shortfall is reasoning or comprehension depth, prefer Opus 4.6; if it is specification or instruction handling, prefer Gemini 3.1 Pro.
+4. **Return the work to the orchestrator.** Execute it directly, remove temporary worktrees, state the delegation failure reason, and perform final verification.
+
+## 7. Isolation Reference
+
+| Task type | Worktree | `-AutoApprove` | Parallel |
 | --- | --- | --- | --- |
-| Read-only analysis | No (pass repository root as `-WorkingDirectory`) | No (must omit `-AutoApprove`) | Yes (independent read-heavy tasks may run concurrently) |
-| Bounded write | Yes (must create detached worktree: `git worktree add --detach <path> HEAD`) | Yes (only when authorized by task contract for local writes) | Yes (provided tasks have disjoint file ownership) |
-| Work touching shared contracts, schemas, public interfaces, dependency manifests, global configuration, or architectural decisions | Yes (if delegated as a bounded write; otherwise kept in orchestrator) | Yes (only when authorized by task contract for local writes) | No (must serialize execution; parallel writes prohibited) |
+| Read-only analysis | Not required; pass the repository root | No | Yes, for independent reads |
+| Bounded write | Required: `git worktree add --detach <path> HEAD` | Only when the contract authorizes the writes | Yes, with disjoint file ownership |
+| Shared contracts, schemas, public interfaces, dependency manifests, global configuration, architecture | Required if delegated at all | Only when the contract authorizes the writes | No — serialize |

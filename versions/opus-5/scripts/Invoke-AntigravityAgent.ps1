@@ -4,18 +4,33 @@
 Runs one stateless Antigravity CLI task in an existing isolated Git worktree.
 
 .DESCRIPTION
-The orchestrating Codex agent owns worktree creation, integration, commits, and cleanup.
-This wrapper validates the worktree and UTF-8 task contract, resolves a stable Gemini
-alias against `agy models`, explicitly attaches the resolved worktree, then runs a
-single non-interactive Antigravity session with a ten-minute print timeout. It writes
+The orchestrating Claude Code agent owns worktree creation, integration, commits, and
+cleanup. This wrapper validates the worktree and UTF-8 task contract, resolves a stable
+worker alias against `agy models`, explicitly attaches the resolved worktree, then runs
+a single non-interactive Antigravity session with a ten-minute print timeout. It writes
 no log files and returns the Antigravity process exit code.
 
+Supported aliases resolve to Antigravity slugs as follows. The Gemini slugs embed the
+reasoning effort as a suffix, whereas Claude Opus 4.6 is published only as a
+thinking-mode slug and therefore takes no effort suffix. Do not pass `--effort`: for
+Gemini it duplicates the slug, and for Opus 4.6 thinking mode is already implied.
+
+  gemini-3.6-flash  ->  gemini-3.6-flash-high
+  gemini-3.1-pro    ->  gemini-3.1-pro-high
+  claude-opus-4-6   ->  claude-opus-4-6-thinking
+
 .EXAMPLE
-& "$HOME\.codex\scripts\Invoke-AntigravityAgent.ps1" `
+& "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" `
   -WorkingDirectory "C:\src\project-agent-task" `
   -Model gemini-3.6-flash `
   -PromptFile "C:\src\contracts\task.md" `
   -AutoApprove
+
+.EXAMPLE
+& "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" `
+  -WorkingDirectory "C:\src\project" `
+  -Model claude-opus-4-6 `
+  -PromptFile "C:\src\contracts\analysis.md"
 #>
 
 [CmdletBinding()]
@@ -25,7 +40,7 @@ param(
     [string]$WorkingDirectory,
 
     [Parameter(Mandatory)]
-    [ValidateSet('gemini-3.6-flash', 'gemini-3.1-pro')]
+    [ValidateSet('gemini-3.6-flash', 'gemini-3.1-pro', 'claude-opus-4-6')]
     [string]$Model,
 
     [Parameter(Mandatory)]
@@ -107,6 +122,7 @@ $cleanModelsOutput = Remove-AnsiEscapeSequences -Text $modelsOutput
 $modelSlug = switch ($Model) {
     'gemini-3.6-flash' { 'gemini-3.6-flash-high' }
     'gemini-3.1-pro'   { 'gemini-3.1-pro-high' }
+    'claude-opus-4-6'  { 'claude-opus-4-6-thinking' }
     default { throw "Unsupported model alias: $Model" }
 }
 
