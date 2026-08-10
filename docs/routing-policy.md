@@ -32,24 +32,32 @@ Scores are routing estimates on a 0–100 scale; higher is better. Cost Efficien
 | ---------------- | ------------------- | --------- | ------------ | --------- | ------ | ------- | ---- | ---- | -------- | ----------- |
 | Opus 5           | Orchestrator (self) | 30        | 80           | 91        | 81     | 62      | 95   | 74   | 88       | 63          |
 | Opus 4.6         | Worker              | 60        | 74           | 88        | 78     | 49      | 89   | 70   | 83       | 63          |
-| Gemini 3.1 Pro   | Worker              | 86        | 77           | 85        | 76     | 45      | 91   | 78   | 85       | 79          |
-| Gemini 3.6 Flash | Worker — default    | 88        | 75           | 82        | 78     | 49      | 88   | 65   | 85       | 75          |
+| Gemini 3.1 Pro   | Worker              | 86        | 77           | 84        | 76     | 44      | 91   | 78   | 85       | 79          |
+| Gemini 3.5 Flash | Worker              | 87        | 75           | 82        | 78     | 49      | 88   | 65   | 85       | 75          |
+| Gemini 3.6 Flash | Worker — default    | 88        | 74           | 85        | 78     | 43      | 86   | 63   | 84       | 75          |
 
 The Opus 5 row is a reference baseline describing the orchestrator itself. It has no wrapper alias and cannot be invoked; its purpose is to make the capability cost of delegating explicit rather than assumed.
 
 ### 4.1 Gemini 3.6 Flash
 
 - **Alias / slug:** `gemini-3.6-flash` → `gemini-3.6-flash-high`
-- **Routed work:** default for bounded, objectively verifiable implementation, repetitive edits, migrations, frontend/UI, documentation and copy, data transformation, and straightforward coding.
-- **Move off when:** the task turns on dense specification comprehension or instruction/language nuance (prefer 3.1 Pro), or on reasoning and comprehension depth (prefer Opus 4.6).
+- **Routed work:** default for bounded, objectively verifiable implementation, repetitive edits, migrations, frontend/UI, documentation and copy, data transformation, and straightforward coding. It holds the highest Cost Efficiency of any worker and leads the Flash pair on Reasoning, which makes it the better single-pass worker.
+- **Move off when:** the task is agentic in shape — multi-step, iterative, or requiring exploration before the change is clear (prefer 3.5 Flash); or turns on dense specification comprehension or instruction/language nuance (prefer 3.1 Pro); or on reasoning and comprehension depth (prefer Opus 4.6).
 
-### 4.2 Gemini 3.1 Pro
+### 4.2 Gemini 3.5 Flash
+
+- **Alias / slug:** `gemini-3.5-flash` → `gemini-3.5-flash-high`
+- **Routed work:** bounded work that is agentic in shape — multi-step edits within a worktree, iterative build-test-fix loops, and tasks requiring exploration before the change is clear.
+- **Selection rule against 3.6 Flash:** Agentic is the only material gap between the two (49 against 43). Cost Efficiency differs by one point and Coding and Instruction are tied, so route on task shape rather than price. Its Math and Data edge over 3.6 Flash is not a routing reason, because 3.1 Pro leads both by a wide margin and should take that work instead.
+- **Move off when:** the task is a single-pass transformation where Reasoning carries it (prefer 3.6 Flash), or the shortfall is specification handling or quantitative depth (prefer 3.1 Pro).
+
+### 4.3 Gemini 3.1 Pro
 
 - **Alias / slug:** `gemini-3.1-pro` → `gemini-3.1-pro-high`
-- **Routed work:** dense specifications, instruction- or language-heavy work, and difficult quantitative work suitable for an external worker.
-- **Move off when:** the task is straightforward coding or repetitive editing that 3.6 Flash already handles, since Cost Efficiency then governs.
+- **Routed work:** dense specifications, instruction- or language-heavy work, and difficult quantitative work suitable for an external worker. It leads every worker on Math, Data, and Instruction.
+- **Move off when:** the task is straightforward coding or repetitive editing that a Flash worker already handles, since Cost Efficiency then governs.
 
-### 4.3 Claude Opus 4.6
+### 4.4 Claude Opus 4.6
 
 - **Alias / slug:** `claude-opus-4-6` → `claude-opus-4-6-thinking`
 - **Slug note:** unlike the Gemini aliases, this slug carries no reasoning-effort suffix; thinking mode is intrinsic. There is no `-high` variant, and `--effort` must not be passed.
@@ -68,7 +76,7 @@ The Opus 5 row is a reference baseline describing the orchestrator itself. It ha
 
 1. **Diagnose contract, context, and environment first.** Worker failures, invalid output, missing return fields, and wrapper errors are most often caused by an incomplete contract, missing repository context, an unstated constraint, or an environment problem. Fix the cause and re-run on the same model. Switching models does not repair a bad contract.
 2. **Make one targeted repair attempt.** Supply specific failure feedback, logs, or refined instructions to the same worker. Exactly one attempt.
-3. **Switch to a better-fit worker.** Select against the observed failure mode rather than by rank. If the shortfall is reasoning or comprehension depth, prefer Opus 4.6; if it is specification or instruction handling, prefer Gemini 3.1 Pro.
+3. **Switch to a better-fit worker.** Select against the observed failure mode rather than by rank. If the shortfall is reasoning or comprehension depth, prefer Opus 4.6; if it is specification, instruction handling, or quantitative depth, prefer Gemini 3.1 Pro; if the worker stalled on a multi-step or exploratory task rather than on the content itself, prefer Gemini 3.5 Flash.
 4. **Return the work to the orchestrator.** Execute it directly, remove temporary worktrees, state the delegation failure reason, and perform final verification.
 
 ## 7. Isolation Reference

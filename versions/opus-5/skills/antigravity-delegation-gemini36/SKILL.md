@@ -1,6 +1,6 @@
 ---
 name: antigravity-delegation-gemini36
-description: Policy for delegating bounded execution work from the Claude Code orchestrator to Antigravity CLI workers (gemini-3.6-flash, gemini-3.1-pro, claude-opus-4-6). Covers model routing, Git worktree isolation, task contracts, background invocation, and parallelism. Use whenever work is separable, bounded, and objectively verifiable — implementation, repetitive edits, refactors, migrations, frontend/UI, documentation and copy, data transformation, test writing, codebase research or analysis reads — or whenever several independent units of work could run in parallel, the task would consume a large amount of context, or the user asks to delegate, spawn a worker, use a subagent, or run something with Gemini, Opus 4.6, or Antigravity.
+description: Policy for delegating bounded execution work from the Claude Code orchestrator to Antigravity CLI workers (gemini-3.6-flash, gemini-3.5-flash, gemini-3.1-pro, claude-opus-4-6). Covers model routing, Git worktree isolation, task contracts, background invocation, and parallelism. Use whenever work is separable, bounded, and objectively verifiable — implementation, repetitive edits, refactors, migrations, frontend/UI, documentation and copy, data transformation, test writing, codebase research or analysis reads — or whenever several independent units of work could run in parallel, the task would consume a large amount of context, or the user asks to delegate, spawn a worker, use a subagent, or run something with Gemini, Opus 4.6, or Antigravity.
 ---
 
 # Antigravity Delegation
@@ -23,14 +23,16 @@ Scores are routing estimates on a 0–100 scale; higher is better. Cost Efficien
 | ---------------- | ------------------- | --------- | ------------ | --------- | ------ | ------- | ---- | ---- | -------- | ----------- |
 | Opus 5           | Orchestrator (self) | 30        | 80           | 91        | 81     | 62      | 95   | 74   | 88       | 63          |
 | Opus 4.6         | Worker              | 60        | 74           | 88        | 78     | 49      | 89   | 70   | 83       | 63          |
-| Gemini 3.1 Pro   | Worker              | 86        | 77           | 85        | 76     | 45      | 91   | 78   | 85       | 79          |
-| Gemini 3.6 Flash | Worker — default    | 88        | 75           | 82        | 78     | 49      | 88   | 65   | 85       | 75          |
+| Gemini 3.1 Pro   | Worker              | 86        | 77           | 84        | 76     | 44      | 91   | 78   | 85       | 79          |
+| Gemini 3.5 Flash | Worker              | 87        | 75           | 82        | 78     | 49      | 88   | 65   | 85       | 75          |
+| Gemini 3.6 Flash | Worker — default    | 88        | 74           | 85        | 78     | 43      | 86   | 63   | 84       | 75          |
 
 The Opus 5 row describes you and is a reference baseline, not a delegation target; it has no alias and cannot be invoked. Read it two ways. Its lead in Agentic is why sustained autonomous multi-step work, open-ended exploration, and evolving judgement stay in the orchestrator. Its lowest Cost Efficiency is why everything else should leave: orchestrator capacity is the scarcest resource here, so delegating bounded work protects it. Where a worker trails Opus 5 on a score the task depends on, that gap is the quality you are trading for parallelism, token capacity, and context isolation.
 
 ## Default routes
 
-- **Gemini 3.6 Flash:** default for bounded, objectively verifiable implementation; repetitive edits; migrations; frontend/UI; documentation and copy; data transformation; and straightforward coding.
+- **Gemini 3.6 Flash:** default for bounded, objectively verifiable implementation; repetitive edits; migrations; frontend/UI; documentation and copy; data transformation; and straightforward coding. It leads the Flash pair on Reasoning, so it is the better single-pass worker.
+- **Gemini 3.5 Flash:** bounded work that is agentic in shape — multi-step edits inside the worktree, iterative build-test-fix loops, and tasks needing exploration before the change is clear. Its Agentic lead over 3.6 Flash is the only material gap between them; Cost Efficiency is effectively tied, so route on task shape, not price. Its small Math and Data edge is not a routing reason, since 3.1 Pro leads both by a wide margin.
 - **Gemini 3.1 Pro:** dense specifications, instruction- or language-heavy work, and difficult quantitative work suitable for an external worker.
 - **Opus 4.6:** work whose binding constraint is reasoning or comprehension depth rather than volume — intricate debugging, refactors with subtle invariants, and large cross-file analysis reads. Also the first escalation target when a Gemini worker fails on capability rather than on contract or context.
 
@@ -41,6 +43,7 @@ The orchestrator retains architecture, design, shared contracts, integration, re
 Workers use the official Antigravity CLI through the authenticated subscription session; never request or use an API key.
 
 - `gemini-3.6-flash` → `gemini-3.6-flash-high`
+- `gemini-3.5-flash` → `gemini-3.5-flash-high`
 - `gemini-3.1-pro` → `gemini-3.1-pro-high`
 - `claude-opus-4-6` → `claude-opus-4-6-thinking`
 

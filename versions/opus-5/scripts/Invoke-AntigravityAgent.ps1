@@ -16,6 +16,7 @@ thinking-mode slug and therefore takes no effort suffix. Do not pass `--effort`:
 Gemini it duplicates the slug, and for Opus 4.6 thinking mode is already implied.
 
   gemini-3.6-flash  ->  gemini-3.6-flash-high
+  gemini-3.5-flash  ->  gemini-3.5-flash-high
   gemini-3.1-pro    ->  gemini-3.1-pro-high
   claude-opus-4-6   ->  claude-opus-4-6-thinking
 
@@ -40,7 +41,7 @@ param(
     [string]$WorkingDirectory,
 
     [Parameter(Mandatory)]
-    [ValidateSet('gemini-3.6-flash', 'gemini-3.1-pro', 'claude-opus-4-6')]
+    [ValidateSet('gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-pro', 'claude-opus-4-6')]
     [string]$Model,
 
     [Parameter(Mandatory)]
@@ -121,6 +122,7 @@ if ($modelsExitCode -ne 0) {
 $cleanModelsOutput = Remove-AnsiEscapeSequences -Text $modelsOutput
 $modelSlug = switch ($Model) {
     'gemini-3.6-flash' { 'gemini-3.6-flash-high' }
+    'gemini-3.5-flash' { 'gemini-3.5-flash-high' }
     'gemini-3.1-pro'   { 'gemini-3.1-pro-high' }
     'claude-opus-4-6'  { 'claude-opus-4-6-thinking' }
     default { throw "Unsupported model alias: $Model" }

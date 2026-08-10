@@ -57,6 +57,7 @@ versions/opus-5/
 封裝腳本使用的穩定 alias 為：
 
 - `gemini-3.6-flash` → `gemini-3.6-flash-high`
+- `gemini-3.5-flash` → `gemini-3.5-flash-high`
 - `gemini-3.1-pro` → `gemini-3.1-pro-high`
 - `claude-opus-4-6` → `claude-opus-4-6-thinking`
 
@@ -67,11 +68,14 @@ Gemini 的 slug 以字尾帶出推理強度，Opus 4.6 則只發布 thinking 模
 | 模型 | 定位 | 委派範圍 |
 | --- | --- | --- |
 | Gemini 3.6 Flash | 預設 worker | 有界且可客觀驗證的實作、重複性編輯、遷移、前端／UI、文件與文案、資料轉換 |
+| Gemini 3.5 Flash | worker | 形態偏 agentic 的有界工作：worktree 內的多步驟編輯、build-test-fix 迭代、需先探索才能定案的任務 |
 | Gemini 3.1 Pro | worker | 密集規格、指令／語言密集型工作、較困難的量化工作 |
 | Claude Opus 4.6 | worker | 瓶頸在推理／理解深度而非工作量者：棘手的除錯、含隱性不變量的重構、大範圍跨檔案分析 |
 | Claude Opus 5 | 主代理本身 | 不可委派，僅作為能力表的參照基準 |
 
-三個 worker 之間依「先看能力門檻，再比 Cost Efficiency」排序。Gemini 額度充裕且 Cost Efficiency 最高，因此是預設值；Opus 4.6 在推理與理解深度上明顯較強，當任務的瓶頸落在這裡時就該用它，同時它也是 Gemini 因能力不足（而非契約或上下文問題）失敗時的第一個升級對象。
+四個 worker 之間依「先看能力門檻，再比 Cost Efficiency」排序。Gemini 額度充裕且 Cost Efficiency 最高，因此是預設值；Opus 4.6 在推理與理解深度上明顯較強，當任務的瓶頸落在這裡時就該用它，同時它也是 Gemini 因能力不足（而非契約或上下文問題）失敗時的第一個升級對象。
+
+兩個 Flash 之間只憑任務形態區分，不看價格：兩者 Cost Efficiency 僅差 1 分，Coding 與 Instruction 完全相同，唯一具實質差距的是 Agentic（3.5 Flash 為 49，3.6 Flash 為 43）。3.6 Flash 的 Reasoning 較高，適合單趟完成的任務；需要多步驟往返時改用 3.5 Flash。
 
 主代理（Opus 5）的 Cost Efficiency 是全表最低，也就是說**主代理的容量才是整個系統最稀缺的資源**。因此原則是把有界工作盡量交出去，而不是自己吸收——自己做等於用最貴的容量處理本可外包的事。完整規則以 Skill 為準。
 
@@ -149,7 +153,7 @@ Get-Item -LiteralPath "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" -Strea
 ## 限制
 
 - 委派要求目標目錄位於 Git 版本庫內。
-- 封裝腳本只開放 `gemini-3.6-flash`、`gemini-3.1-pro` 與 `claude-opus-4-6` 三個 alias。
+- 封裝腳本只開放 `gemini-3.6-flash`、`gemini-3.5-flash`、`gemini-3.1-pro` 與 `claude-opus-4-6` 四個 alias。
 - Opus 5 是主代理本身，並非可委派的模型，也沒有對應的 alias。
 
 ## 延伸閱讀
