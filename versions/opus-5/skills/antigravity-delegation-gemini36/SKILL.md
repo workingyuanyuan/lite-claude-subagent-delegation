@@ -31,8 +31,8 @@ The Opus 5 row describes you and is a reference baseline, not a delegation targe
 
 ## Default routes
 
-- **Gemini 3.6 Flash:** default for bounded, objectively verifiable implementation; repetitive edits; migrations; frontend/UI; documentation and copy; data transformation; and straightforward coding. It leads the Flash pair on Reasoning, so it is the better single-pass worker.
-- **Gemini 3.5 Flash:** bounded work that is agentic in shape — multi-step edits inside the worktree, iterative build-test-fix loops, and tasks needing exploration before the change is clear. Its Agentic lead over 3.6 Flash is the only material gap between them; Cost Efficiency is effectively tied, so route on task shape, not price. Its small Math and Data edge is not a routing reason, since 3.1 Pro leads both by a wide margin.
+- **Gemini 3.6 Flash:** default for bounded, objectively verifiable implementation; repetitive edits; migrations; frontend/UI; documentation and copy; data transformation; and straightforward coding. Prefer it for single-pass work.
+- **Gemini 3.5 Flash:** bounded work that is agentic in shape — multi-step edits inside the worktree, iterative build-test-fix loops, and tasks needing exploration before the change is clear.
 - **Gemini 3.1 Pro:** dense specifications, instruction- or language-heavy work, and difficult quantitative work suitable for an external worker.
 - **Opus 4.6:** work whose binding constraint is reasoning or comprehension depth rather than volume — intricate debugging, refactors with subtle invariants, and large cross-file analysis reads. Also the first escalation target when a Gemini worker fails on capability rather than on contract or context.
 
