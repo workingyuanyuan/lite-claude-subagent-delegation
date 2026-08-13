@@ -55,7 +55,7 @@ When invoking a worker, emit exactly one progress line before the call: `Delegat
 & "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" -WorkingDirectory $worktree -Model gemini-3.6-flash -PromptFile $contract -AutoApprove
 ```
 
-Use `-AutoApprove` only when the task contract authorizes the required local writes. **Always invoke with `run_in_background: true`:** the wrapper's print timeout is ten minutes, which equals the PowerShell tool's foreground limit, so a foreground call can be killed before the worker finishes. Backgrounding is also what makes parallel delegation possible.
+Use `-AutoApprove` only when the task contract authorizes the required local writes **and** every MCP server configured on the CLI is acceptable for this worker to use. It auto-approves every tool call, not just file writes inside the worktree; the worktree bounds the filesystem, not MCP. Omit it for read-only tasks. **Always invoke with `run_in_background: true`:** the wrapper's print timeout is ten minutes, which equals the PowerShell tool's foreground limit, so a foreground call can be killed before the worker finishes. Backgrounding is also what makes parallel delegation possible.
 
 ## Delegation rules
 

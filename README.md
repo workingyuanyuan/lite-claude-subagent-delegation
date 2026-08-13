@@ -102,7 +102,9 @@ Claude Code 預設每次呼叫封裝腳本與 Git 指令時都會跳出權限確
 }
 ```
 
-這些規則可以安全放行的原因為：封裝腳本強制 `-WorkingDirectory` 必須是 Git worktree 根目錄，Gemini 的寫入範圍已被限制在一次性的隔離 worktree 內；真正的把關點是調度代理整合前對完整 diff 的審查。清單裡沒有任何會改變版本庫狀態的指令。
+這些規則可以放行的原因為：清單裡沒有任何會改變版本庫狀態的指令，而真正的把關點是調度代理整合前對完整 diff 的審查。
+
+> **注意 `-AutoApprove` 的實際範圍。** 封裝腳本強制 `-WorkingDirectory` 必須是 Git worktree 根目錄，這確實把 worker 的**檔案寫入**限制在一次性的隔離 worktree 內。但 `-AutoApprove` 展開成 `--dangerously-skip-permissions`，它自動核准的是 worker 的**所有**工具呼叫，包含 Antigravity CLI 上掛載的任何 MCP server；`--add-dir` 只約束檔案系統，管不到 MCP。若你設定過帶有憑證的 MCP server（例如持有 token 的 GitHub server），帶 `-AutoApprove` 的 worker 就能透過它對外動作。加旗標前請先確認 `~/.gemini/config/mcp_config.json` 裡的 server 清單，對該任務而言全部可信。
 
 ## 解除腳本的下載來源標記
 
@@ -140,7 +142,7 @@ Get-Item -LiteralPath "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" -Strea
 
 說明：
 
-- 只有在任務契約允許指定範圍內的本機寫入時才使用 `-AutoApprove`。
+- 只有在任務契約允許指定範圍內的本機寫入、且已掛載的 MCP server 對該任務皆可信時，才使用 `-AutoApprove`。它核准的是所有工具，不只是 worktree 內的檔案寫入。
 - 子代理不應提交、合併、推送、發布或部署。Claude Code 必須審查輸出並完成最終驗收。
 - **呼叫必須在背景執行**：因為封裝腳本的列印逾時是十分鐘，等於 Claude Code PowerShell 工具的前台逾時上限，前台呼叫可能在 worker 完成前被中止。
 
