@@ -5,32 +5,34 @@ Runs one stateless Antigravity CLI task in an existing isolated Git worktree.
 
 .DESCRIPTION
 The orchestrating Claude Code agent owns worktree creation, integration, commits, and
-cleanup. This wrapper validates the worktree and UTF-8 task contract, resolves a stable
-worker alias against `agy models`, explicitly attaches the resolved worktree, then runs
-a single non-interactive Antigravity session with a ten-minute print timeout. It writes
-no log files and returns the Antigravity process exit code.
+cleanup. This wrapper validates the worktree and UTF-8 task contract, confirms the
+requested model slug is still offered by `agy models`, explicitly attaches the resolved
+worktree, then runs a single non-interactive Antigravity session with a ten-minute print
+timeout. It writes no log files and returns the Antigravity process exit code.
 
-Supported aliases resolve to Antigravity slugs as follows. The Gemini slugs embed the
-reasoning effort as a suffix, whereas Claude Opus 4.6 is published only as a
-thinking-mode slug and therefore takes no effort suffix. Do not pass `--effort`: for
-Gemini it duplicates the slug, and for Opus 4.6 thinking mode is already implied.
+-Model takes an exact Antigravity slug from the allowlist below. Reasoning effort is
+part of the slug and is therefore always explicit at the call site; do not pass
+`--effort`, which would duplicate it.
 
-  gemini-3.6-flash  ->  gemini-3.6-flash-high
-  gemini-3.5-flash  ->  gemini-3.5-flash-high
-  gemini-3.1-pro    ->  gemini-3.1-pro-high
-  claude-opus-4-6   ->  claude-opus-4-6-thinking
+  gemini-3.7-flash-medium   default worker
+  gemini-3.7-flash-high     same model at higher reasoning effort
+  gemini-3.1-pro-high       data-bound work
+
+`agy models` also lists superseded Gemini generations, other effort levels, and Claude
+worker slugs. This wrapper accepts only the three slugs above; anything else is
+rejected before the CLI is invoked.
 
 .EXAMPLE
 & "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" `
   -WorkingDirectory "C:\src\project-agent-task" `
-  -Model gemini-3.6-flash `
+  -Model gemini-3.7-flash-medium `
   -PromptFile "C:\src\contracts\task.md" `
   -AutoApprove
 
 .EXAMPLE
 & "$HOME\.claude\scripts\Invoke-AntigravityAgent.ps1" `
   -WorkingDirectory "C:\src\project" `
-  -Model claude-opus-4-6 `
+  -Model gemini-3.7-flash-high `
   -PromptFile "C:\src\contracts\analysis.md"
 #>
 
@@ -41,7 +43,7 @@ param(
     [string]$WorkingDirectory,
 
     [Parameter(Mandatory)]
-    [ValidateSet('gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-pro', 'claude-opus-4-6')]
+    [ValidateSet('gemini-3.7-flash-medium', 'gemini-3.7-flash-high', 'gemini-3.1-pro-high')]
     [string]$Model,
 
     [Parameter(Mandatory)]
@@ -120,18 +122,13 @@ if ($modelsExitCode -ne 0) {
 }
 
 $cleanModelsOutput = Remove-AnsiEscapeSequences -Text $modelsOutput
-$modelSlug = switch ($Model) {
-    'gemini-3.6-flash' { 'gemini-3.6-flash-high' }
-    'gemini-3.5-flash' { 'gemini-3.5-flash-high' }
-    'gemini-3.1-pro'   { 'gemini-3.1-pro-high' }
-    'claude-opus-4-6'  { 'claude-opus-4-6-thinking' }
-    default { throw "Unsupported model alias: $Model" }
-}
 
-# agy 1.1.4 emits model slugs rather than display names. Match the exact slug as
-# a standalone token, then pass that slug unchanged to `agy --model`.
-$modelPattern = '(?<![A-Za-z0-9._-])' + [regex]::Escape($modelSlug) + '(?![A-Za-z0-9._-])'
-$resolvedModels = @(
+# The ValidateSet holds exact Antigravity slugs, so -Model needs no translation; it is
+# only confirmed to still be on offer before invoking. agy 1.1.4 emits model slugs
+# rather than display names. Match the slug as a standalone token so that, for example,
+# `gemini-3.7-flash-high` cannot be satisfied by `gemini-3.7-flash-medium`.
+$modelPattern = '(?<![A-Za-z0-9._-])' + [regex]::Escape($Model) + '(?![A-Za-z0-9._-])'
+$offeredModels = @(
     [regex]::Matches(
         $cleanModelsOutput,
         $modelPattern,
@@ -141,15 +138,14 @@ $resolvedModels = @(
         Sort-Object -Unique
 )
 
-if ($resolvedModels.Count -ne 1) {
-    throw "Model alias '$Model' did not resolve uniquely to slug '$modelSlug'. Found $($resolvedModels.Count) match(es). Available model output:`n$cleanModelsOutput"
+if ($offeredModels.Count -ne 1) {
+    throw "Model slug '$Model' is not offered exactly once by ``agy models``. Found $($offeredModels.Count) match(es). Available model output:`n$cleanModelsOutput"
 }
-$resolvedModel = $modelSlug
 
 $agyArguments = @(
     '--add-dir', $worktreePath,
     '--print-timeout', '10m',
-    '--model', $resolvedModel,
+    '--model', $Model,
     '-p', $prompt
 )
 if ($AutoApprove) {
