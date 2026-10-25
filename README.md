@@ -42,7 +42,7 @@ claude-opus-5-5/
 在 `~/.claude/CLAUDE.md`（Windows：`%USERPROFILE%\.claude\CLAUDE.md`）加入：
 
 ```text
-When delegating would save your context or improve quality, read and follow the delegate skill and proactively delegate suitable tasks.
+Before delivering a design or merge-bound code, and whenever delegating would save your context or improve quality, read and follow the delegate skill and proactively delegate suitable tasks.
 ```
 
 若已有其他委派 skill 的入口句，改成上句。
