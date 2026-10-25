@@ -64,6 +64,7 @@ Before delivering a design or merge-bound code, and whenever delegating would sa
 | `gpt-6.1-sol` | `high` | 大型或高風險 diff，或 medium 未通過驗收 |
 | `gpt-6-astra` | `medium` | 動手前的設計討論、架構第二意見、根因假設 |
 | `gemini-4-argon-medium` | ID 內 | 需看圖片、PDF、影音的審查與意見 |
+| `gemini-4-argon-medium` | ID 內 | 高風險設計（並行、資料完整性、安全性）與 Astra 並行的第二份設計意見 |
 | `gemini-3.8-flash-medium` / `-high` | ID 內 | 多模態抽取、機械性程式任務 |
 | `gemini-3.8-flash-medium` + `/boost` | ID 內 | 難查的根因調查，交付重現方式與根因 |
 

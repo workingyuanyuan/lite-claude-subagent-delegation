@@ -16,6 +16,7 @@ Delegate when it saves your context or improves quality, and checking the result
 | `gpt-6.1-sol` | `high` | Large or risky diffs, or when medium fails acceptance. |
 | `gpt-6-astra` | `medium` | Design discussion, architecture second opinion, root-cause hypotheses before you act. |
 | `gemini-4-argon-medium` | in ID | Review or opinions that require images, PDFs, audio, or video. |
+| `gemini-4-argon-medium` | in ID | Second design opinion alongside Astra for high-stakes designs (concurrency, data integrity, security). |
 | `gemini-3.8-flash-medium` | in ID | Multimodal extraction; mechanical edits: renames, format conversion, boilerplate, tests that follow examples. |
 | `gemini-3.8-flash-high` | in ID | The above when medium fails acceptance or the task is clearly hard. |
 | `gemini-3.8-flash-medium` + `/boost` | in ID | Hard root-cause investigation (concurrency, flaky bugs); deliverable is a repro and the root cause. Takes minutes even when small. |
