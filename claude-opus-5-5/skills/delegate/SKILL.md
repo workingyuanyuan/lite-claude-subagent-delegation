@@ -34,4 +34,4 @@ Give each worker its objective, necessary context without your preferred answer,
 
 Run write-capable workers without asking the user. Read-only workers may run in parallel. While a writer runs, do not edit its workspace; give parallel writers separate git worktrees (Agent `isolation: "worktree"`, codex `-C <worktree>`).
 
-Discard conclusions behind a failure notice. Check only the review points you adopt; verify implementations by diff and the acceptance check. For insufficient results, clarify, raise effort, or take over.
+Discard conclusions behind a failure notice. Check only the review points you adopt; verify implementations by diff and the acceptance check. When two workers disagree, report the disagreement instead of picking or blending. For insufficient results, clarify, raise effort, or take over.
