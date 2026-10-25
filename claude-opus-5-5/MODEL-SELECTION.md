@@ -35,7 +35,7 @@
 - `agy --output-format json` 的 `status` 在子代理失敗時仍是 `SUCCESS`，不能依賴它判斷成敗。
 - **音訊轉錄（新 session 主動委派）**：主代理交給 Flash 轉錄，再自行加派 Argon 重聽核對。日期、數字、人名全對；但 Flash 把「被擋」聽成「被打」，Argon 正確，主代理沒回報差異，還寫成兩邊都沒有的「被打爆」並稱「兩邊一致」。→ skill 加入「兩個代理結果不一致時回報差異，不挑選也不混寫」。
 - **設計討論（新 session）**：入口句原本只寫「委派能省 context 或提升品質時」，Opus 判斷自己就能做，沒載入 skill。事後手動請 Astra 審查，找到會重新造成事件順序顛倒的嚴重缺陷（寫回結果時沒有檢查租約歸屬）。→ 入口句改成固定檢查點：交付設計或要 merge 的程式碼之前一定讀 skill。
-- **設計審查加派 Argon（使用者指定）**：同一份已整合 Astra 意見的 DESIGN.md，Argon 的第一項發現就是 Astra 漏掉的「批次認領 20 件 × 60 秒租約」缺陷（brief 沒有點出批次），並指出 claim token 擋不住已送出的 HTTP 請求；另找到文件中錯誤的 PostgreSQL 細節（`DELETE ... LIMIT`、HOT update）。→ 新增 Argon 列：高風險設計與 Astra 並行給第二份意見。目前只有這一次樣本，需持續觀察。
+- **設計審查加派 Argon（使用者指定）**：同一份已整合 Astra 意見的 DESIGN.md，Argon 的第一項發現就是 Astra 漏掉的「批次認領 20 件 × 60 秒租約」缺陷（brief 沒有點出批次），並指出 claim token 擋不住已送出的 HTTP 請求；另找到文件中錯誤的 PostgreSQL 細節（`DELETE ... LIMIT`、HOT update）。→ Argon 的 Task fit 加入：高風險設計與 Astra 並行給第二份意見。目前只有這一次樣本，需持續觀察。
 - `codex exec -s read-only -o <路徑>` 可以寫到工作目錄外（`-o` 由 CLI 寫，不受 sandbox 限制）。
 
 ## 分數快照（2026-10-25，10 個共同 benchmark）
