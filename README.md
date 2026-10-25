@@ -65,7 +65,6 @@ Before delivering a design or merge-bound code, and whenever delegating would sa
 | `gpt-6-astra` | `medium` | 動手前的設計討論、架構第二意見、根因假設 |
 | `gemini-4-argon-medium` | ID 內 | 需看圖片、PDF、影音的審查與意見；高風險設計（並行、資料完整性、安全性）與 Astra 並行的第二份設計意見 |
 | `gemini-3.8-flash-medium` / `-high` | ID 內 | 多模態抽取、機械性程式任務 |
-| `gemini-3.8-flash-medium` + `/boost` | ID 內 | 難查的根因調查，交付重現方式與根因 |
 
 寫檔委派直接執行；只讀委派可平行，寫檔委派期間主代理不改同一工作目錄，平行寫檔用 git worktree。每次委派的 brief 與輸出存於 `~/.local/state/delegation-log/<專案>/`。委派結果一律視為未驗證，主代理負責最終驗收與整合。
 

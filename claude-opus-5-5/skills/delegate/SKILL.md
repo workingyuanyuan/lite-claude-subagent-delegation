@@ -1,6 +1,6 @@
 ---
 name: delegate
-description: Delegate work to Codex (GPT), agy (Gemini), or Opus subagents when it saves context or improves quality — review of code you wrote, design second opinions, image/PDF/audio/video work, mechanical edits, hard root-cause investigation, large merge-bound implementation.
+description: Delegate work to Codex (GPT), agy (Gemini), or Opus subagents when it saves context or improves quality — review of code you wrote, design second opinions, image/PDF/audio/video work, mechanical edits, large merge-bound implementation.
 ---
 
 # Delegate
@@ -18,14 +18,13 @@ Delegate when it saves your context or improves quality, and checking the result
 | `gemini-4-argon-medium` | in ID | Review or opinions that require images, PDFs, audio, or video; second design opinion alongside Astra for high-stakes designs (concurrency, data integrity, security). |
 | `gemini-3.8-flash-medium` | in ID | Multimodal extraction; mechanical edits: renames, format conversion, boilerplate, tests that follow examples. |
 | `gemini-3.8-flash-high` | in ID | The above when medium fails acceptance or the task is clearly hard. |
-| `gemini-3.8-flash-medium` + `/boost` | in ID | Hard root-cause investigation (concurrency, flaky bugs); deliverable is a repro and the root cause. Takes minutes even when small. |
 
 ## Run
 
 Save each brief and output in `~/.local/state/delegation-log/$(basename "$PWD")/` (`mkdir -p` it) as `<YYYYMMDD-HHMMSS>-<model>.{brief,out}.md`. Use `run_in_background` for long runs.
 
 - Codex: `codex exec -m <model> -c model_reasoning_effort="<effort>" -s <read-only|workspace-write> -o <out> - < <brief>`. Review through `codex exec` with the diff range in the brief; `codex review` rejects `-m`.
-- agy: `agy --model <model> --dangerously-skip-permissions --print-timeout 20m -p "$(cat <brief>)" > <out> 2>&1`. For Boost, start the brief with `/boost ` and use `30m`.
+- agy: `agy --model <model> --dangerously-skip-permissions --print-timeout 20m -p "$(cat <brief>)" > <out> 2>&1`.
 - Agent tool: `subagent_type: general-purpose`, `model: opus`, `effort: medium`.
 
 ## Brief and integrate

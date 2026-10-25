@@ -30,12 +30,14 @@
 - 紀錄不放 `~/.claude/` 底下，避免寫入設定目錄時跳權限提示。
 
 ## 實測紀錄（2026-10-25，agy 1.4.7、codex-cli 0.163）
-- **`/boost` 在 `agy -p` 下會展開**：orchestrator 選 Delegation routine，派 DeepCoder，底下再開子代理。9 行的 race condition 修好了，但花 7 分 35 秒、輸出約 2.7 萬 token，而且修法過度設計（多加 property、參數、RLock），不是可直接 merge 的 diff。→ skill 只用它做根因調查（DeepInvestigator 路線）。
+- **`/boost` 在 `agy -p` 下會展開**：orchestrator 選 Delegation routine，派 DeepCoder，底下再開子代理。9 行的 race condition 修好了，但花 7 分 35 秒、輸出約 2.7 萬 token，而且修法過度設計（多加 property、參數、RLock），不是可直接 merge 的 diff。→ 原本只保留給根因調查（DeepInvestigator 路線），後來刪除，見下方 t8。
 - **`/browser` 在 `agy -p` 下也會展開**，但 WSL 沒有 Chrome，子代理連不上 DevTools。主代理沒有回報失敗，改讀 HTML 原始碼推出答案並當作成功回覆。→ 瀏覽器任務先移出 skill；brief 範本加入「失敗或換方法要在開頭明講」。要恢復，需在 WSL 安裝 Chrome，並在第一次連線時手動允許遠端偵錯。
 - `agy --output-format json` 的 `status` 在子代理失敗時仍是 `SUCCESS`，不能依賴它判斷成敗。
 - **音訊轉錄（新 session 主動委派）**：主代理交給 Flash 轉錄，再自行加派 Argon 重聽核對。日期、數字、人名全對；但 Flash 把「被擋」聽成「被打」，Argon 正確，主代理沒回報差異，還寫成兩邊都沒有的「被打爆」並稱「兩邊一致」。→ skill 加入「兩個代理結果不一致時回報差異，不挑選也不混寫」。
 - **設計討論（新 session）**：入口句原本只寫「委派能省 context 或提升品質時」，Opus 判斷自己就能做，沒載入 skill。事後手動請 Astra 審查，找到會重新造成事件順序顛倒的嚴重缺陷（寫回結果時沒有檢查租約歸屬）。→ 入口句改成固定檢查點：交付設計或要 merge 的程式碼之前一定讀 skill。
 - **設計審查加派 Argon（使用者指定）**：同一份已整合 Astra 意見的 DESIGN.md，Argon 的第一項發現就是 Astra 漏掉的「批次認領 20 件 × 60 秒租約」缺陷（brief 沒有點出批次），並指出 claim token 擋不住已送出的 HTTP 請求；另找到文件中錯誤的 PostgreSQL 細節（`DELETE ... LIMIT`、HOT update）。→ Argon 的 Task fit 加入：高風險設計與 Astra 並行給第二份意見。目前只有這一次樣本，需持續觀察。
+- **Boost 根因調查（t8，新 session）**：帶假線索（refresher thread、TTL）的偶發 bug，根因是字串雜湊隨機化讓 `set` 走訪順序改變同分排序。Opus 沒有委派，38 秒內用固定 `PYTHONHASHSEED` 確認根因並正確修好。Opus 自己查得出來時不會選 Boost，而 Boost 又慢又會過度修改 → 從 skill 刪除 Boost。
+- **小改動不強制審查**：t8 的一行修正沒有觸發「交付要 merge 的程式碼前讀 skill」的檢查點，但驗證完整，審查價值低。使用者決定維持現狀，不改成「任何 commit 前」。
 - `codex exec -s read-only -o <路徑>` 可以寫到工作目錄外（`-o` 由 CLI 寫，不受 sandbox 限制）。
 
 ## 分數快照（2026-10-25，10 個共同 benchmark）
