@@ -21,10 +21,10 @@ Delegate when it saves your context or improves quality, and checking the result
 
 ## Run
 
-Save each brief and output in `~/.local/state/delegation-log/$(basename "$PWD")/` (`mkdir -p` it) as `<YYYYMMDD-HHMMSS>-<model>.{brief,out}.md`. Use `run_in_background` for long runs.
+Write commands in the syntax of the shell you are running (bash or PowerShell). Save each brief and output in `<home>/.local/state/delegation-log/<project-dir-name>/` (create it) as `<YYYYMMDD-HHMMSS>-<model>.{brief,out}.md`. Use `run_in_background` for long runs.
 
-- Codex: `codex exec -m <model> -c model_reasoning_effort="<effort>" -s <read-only|workspace-write> -o <out> - < <brief>`. Review through `codex exec` with the diff range in the brief; `codex review` rejects `-m`.
-- agy: `agy --model <model> --dangerously-skip-permissions --print-timeout 20m -p "$(cat <brief>)" > <out> 2>&1`.
+- Codex: `codex exec -m <model> -c model_reasoning_effort="<effort>" -s <read-only|workspace-write> -o <out> -`, brief on stdin. Review through `codex exec` with the diff range in the brief; `codex review` rejects `-m`.
+- agy: `agy --model <model> --dangerously-skip-permissions --print-timeout 20m -p <brief text>`, stdout and stderr to `<out>`.
 - Agent tool: `subagent_type: general-purpose`, `model: opus`, `effort: medium`.
 
 ## Brief and integrate

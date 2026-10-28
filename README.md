@@ -22,7 +22,7 @@ claude-opus-5-5/
 ## 前置需求
 
 - [Codex CLI](https://github.com/openai/codex)（已驗證 0.163）與 [Antigravity CLI](https://antigravity.google/docs/cli/reference/) `agy`（已驗證 1.4.7），皆已登入。
-- skill 的呼叫指令使用 bash 語法；Windows 上以 Claude Code 的 Git Bash 執行。
+- 支援 Windows（PowerShell / Git Bash）與 WSL / Linux（bash）；skill 只描述指令參數，由主代理依當下 shell 寫出對應語法。
 
 ## 手動安裝
 
