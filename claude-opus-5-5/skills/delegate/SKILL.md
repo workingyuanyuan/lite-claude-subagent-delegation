@@ -5,7 +5,7 @@ description: Delegate work to Codex (GPT), agy (Gemini), or Opus subagents when 
 
 # Delegate
 
-Delegate when it saves your context or improves quality, and checking the result costs less than doing the work. Do not delegate evidence-backed research reports. Treat every result as unverified.
+Delegate when it saves your context or improves quality, and checking the result costs less than doing the work. Do not delegate evidence-backed research reports, or a chain of dependent steps that fits in your context. Treat every result as unverified.
 
 ## Select a configuration
 
@@ -29,8 +29,8 @@ Write commands in the syntax of the shell you are running (bash or PowerShell). 
 
 ## Brief and integrate
 
-Give each worker its objective, necessary context without your preferred answer, write scope, deliverable, and acceptance check. Require it to state at the top any tool failure, incomplete work, or change of method, and to say "unknown" rather than invent sources, numbers, or dates.
+Give each worker its objective, necessary context without your preferred answer, write scope, deliverable, and an acceptance check it can run itself (test, build, or script). Require it to state at the top any tool failure, incomplete work, or change of method, and to say "unknown" rather than invent sources, numbers, or dates.
 
 Run write-capable workers without asking the user. Read-only workers may run in parallel. While a writer runs, do not edit its workspace; give parallel writers separate git worktrees (Agent `isolation: "worktree"`, codex `-C <worktree>`).
 
-Discard conclusions behind a failure notice. Check only the review points you adopt; verify implementations by diff and the acceptance check. When two workers disagree, report the disagreement instead of picking or blending. For insufficient results, clarify, raise effort, or take over.
+Discard conclusions behind a failure notice. Check only the review points you adopt; verify implementations by diff and the acceptance check. When two workers disagree, report the disagreement instead of picking or blending. For insufficient results, first make sure the worker could run the acceptance check, then clarify or raise effort. Higher effort does not add missing knowledge or skill: for that, switch to a stronger model in the table, or take over.

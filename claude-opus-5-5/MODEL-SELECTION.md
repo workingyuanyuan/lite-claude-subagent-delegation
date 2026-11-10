@@ -28,6 +28,8 @@
 - 委派結果一律視為未驗證的意見。前例：Gemini 曾在要求有證據支撐的報告中捏造模型、分數和日期。
 - 若發現每次都需要主代理完整驗證、實際品質沒提升，要重新和使用者討論委派規則。紀錄在 `~/.local/state/delegation-log/<專案>/`，可回頭檢視。
 - 紀錄不放 `~/.claude/` 底下，避免寫入設定目錄時跳權限提示。
+- **結果不足時的處理順序**（2026-11-10，參考 claude.dev〈Which Claude model should you build with?〉）：先確認 worker 能自己跑驗收（測試、build、腳本），再釐清 brief 或升 effort；缺的是知識或能力時改派較強的模型，因為升 effort 補不了這些。brief 的 acceptance check 也因此要求是 worker 能自己執行的檢查。
+- **連續依賴步驟不委派**（同一篇）：彼此依賴的步驟放得進主代理 context 時，拆分和合併的成本會比省下的多。超出 context 的大型工作仍然照名冊委派。
 
 ## 實測紀錄（2026-10-25，agy 1.4.7、codex-cli 0.163）
 - **`/boost` 在 `agy -p` 下會展開**：orchestrator 選 Delegation routine，派 DeepCoder，底下再開子代理。9 行的 race condition 修好了，但花 7 分 35 秒、輸出約 2.7 萬 token，而且修法過度設計（多加 property、參數、RLock），不是可直接 merge 的 diff。→ 原本只保留給根因調查（DeepInvestigator 路線），後來刪除，見下方 t8。
