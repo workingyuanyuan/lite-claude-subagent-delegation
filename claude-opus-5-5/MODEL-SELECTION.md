@@ -13,15 +13,15 @@
 ## 名冊的決定
 - **要 merge 的程式碼由 Opus 寫，寫完由 Sol 審查。** Claude Opus 5.5 在 Frontier Code 1.1（衡量寫出可 merge 程式碼的能力）得分最高；GPT 模型後端能力強、擅長 review。
 - **不設 Opus advisor。** 主代理就是 Opus，同模型的第二意見只剩隔離 context 的價值。原本想讓 Opus 在 benchmark 中當對照，但 skill 不放分數，所以不需要。
-- **不選 GPT-6 Luna。** Gemini 3.8 Flash 能力勝過它；Gemini 適合委派的任務較窄、額度不容易用完，性價比更好。
-- **Gemini 的定位**：擅長多模態（PNG/PDF/WAV/MP4）。Flash 也接機械性程式任務，用來分流 GPT 額度。
+- **不選 GPT-6 Luna。** 同定位的 Gemini 4 Hydrogen（前代 Gemini 3.8 Flash 已勝過 Luna）較合適；Gemini 適合委派的任務較窄、額度不容易用完，性價比更好。
+- **Gemini 的定位**：擅長多模態（PNG/PDF/WAV/MP4）。Hydrogen 也接機械性程式任務，用來分流 GPT 額度。
 - **Sonnet** 目前不在名冊；之後若加入，算執行任務的角色（Agent tool 或 agy 的 `claude-sonnet-5-5-*`）。
 - **Claude 角色用 Agent tool**，不用 agy 的 `claude-opus-5-5-*`：共用 Claude Code 的工具、權限、MCP，結果直接回到主代理。
 
 ## effort 的選法
 - 優先用供應商推薦的預設值，或 Quality vs Cost 圖上性價比突出的選項。
 - Argon 預設是 medium，medium 就夠。下表列 Argon high 只是因為 medium 的共同 benchmark 太少。
-- Sol、Flash 先用 medium，沒通過驗收或任務明顯困難才升 high。
+- Sol、Hydrogen 先用 medium，沒通過驗收或任務明顯困難才升 high。
 
 ## 委派規則的決定
 - 驗證成本接近自己做的成本 → 不委派（已和使用者確認）。
