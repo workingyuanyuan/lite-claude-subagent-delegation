@@ -29,6 +29,7 @@
 - 若發現每次都需要主代理完整驗證、實際品質沒提升，要重新和使用者討論委派規則。紀錄在 `~/.local/state/delegation-log/<專案>/`，可回頭檢視。
 - 紀錄不放 `~/.claude/` 底下，避免寫入設定目錄時跳權限提示。
 - **結果不足時的處理順序**（2026-11-10，參考 claude.dev〈Which Claude model should you build with?〉）：先確認 worker 能自己跑驗收（測試、build、腳本），再釐清 brief 或升 effort；缺的是知識或能力時改派較強的模型，因為升 effort 補不了這些。brief 的 acceptance check 也因此要求是 worker 能自己執行的檢查。
+- **多模態預設 Hydrogen，Argon 只做判斷**（2026-11-14）：回顧紀錄，Gemini 共 45 次呼叫（Argon 24、Flash 21、Hydrogen 0）。多數 Argon 是視覺／音訊審查，符合原表；但 radar-repro 影片逆向分析（逐段輸出 storyboard JSON，屬擷取）連派 5 次 Argon。原因是 Argon 列「Review or opinions」範圍太寬，Hydrogen 列只寫「Multimodal extraction」沒有例子。→ Hydrogen 列寫明是媒體任務的預設，並列出轉錄、影片／影格時間軸描述、從圖片或 PDF 讀資料；Argon 列改成「對媒體做判斷」，並接手 Hydrogen 失敗的媒體任務。
 - **連續依賴步驟不委派**（同一篇）：彼此依賴的步驟放得進主代理 context 時，拆分和合併的成本會比省下的多。超出 context 的大型工作仍然照名冊委派。
 
 ## 實測紀錄（2026-10-25，agy 1.4.7、codex-cli 0.163）
