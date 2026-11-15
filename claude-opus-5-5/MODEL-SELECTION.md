@@ -30,6 +30,7 @@
 - 紀錄不放 `~/.claude/` 底下，避免寫入設定目錄時跳權限提示。
 - **結果不足時的處理順序**（2026-11-10，參考 claude.dev〈Which Claude model should you build with?〉）：先確認 worker 能自己跑驗收（測試、build、腳本），再釐清 brief 或升 effort；缺的是知識或能力時改派較強的模型，因為升 effort 補不了這些。brief 的 acceptance check 也因此要求是 worker 能自己執行的檢查。
 - **多模態預設 Hydrogen，Argon 只做判斷**（2026-11-14）：回顧紀錄，Gemini 共 45 次呼叫（Argon 24、Flash 21、Hydrogen 0）。多數 Argon 是視覺／音訊審查，符合原表；但 radar-repro 影片逆向分析（逐段輸出 storyboard JSON，屬擷取）連派 5 次 Argon。原因是 Argon 列「Review or opinions」範圍太寬，Hydrogen 列只寫「Multimodal extraction」沒有例子。→ Hydrogen 列寫明是媒體任務的預設，並列出轉錄、影片／影格時間軸描述、從圖片或 PDF 讀資料；Argon 列改成「對媒體做判斷」，並接手 Hydrogen 失敗的媒體任務。
+- **搭建前固定問兩位 advisor**（2026-11-15）：新專案、新功能或改版（不含小改動）開始搭建前，一律平行、唯讀地問 Astra 和 Argon，把採納點和分歧呈報使用者，分歧由使用者決定後才動工。不再區分「設計找 Astra、高風險或 UX 才加 Argon」，主代理不必判斷該問誰，省 context，也提升設計品質（使用者決定）。來源：11/06 使用者在 phone-disassembly 要求「在開始搭建前先向其他代理詢問第二意見」，原本只存成該專案記憶；11/15 記憶整理時被當成與 skill 重複刪除，才發現 skill 沒有這條規則。兩人互補的實例見下方「設計審查加派 Argon」。
 - **連續依賴步驟不委派**（同一篇）：彼此依賴的步驟放得進主代理 context 時，拆分和合併的成本會比省下的多。超出 context 的大型工作仍然照名冊委派。
 
 ## 實測紀錄（2026-10-25，agy 1.4.7、codex-cli 0.163）

@@ -7,6 +7,8 @@ description: Delegate work to Codex (GPT), agy (Gemini), or Opus subagents when 
 
 Delegate when it saves your context or improves quality, and checking the result costs less than doing the work. Do not delegate evidence-backed research reports, or a chain of dependent steps that fits in your context. Treat every result as unverified.
 
+Before building from a new design (a new project, feature, or redesign; not small changes), ask both advisors, Astra and Argon, in parallel and read-only. Report adopted points and disagreements to the user, and build only after the user decides the disagreements.
+
 ## Select a configuration
 
 | Model ID | Effort | Task fit |
@@ -14,8 +16,8 @@ Delegate when it saves your context or improves quality, and checking the result
 | Agent tool `opus` | `medium` | Merge-bound code too large for your context; otherwise write it yourself. |
 | `gpt-6.1-sol` | `medium` | Review of code you wrote; non-merged backend work: repro scripts, load tests, one-off tools, backend investigation. |
 | `gpt-6.1-sol` | `high` | Large or risky diffs, or when medium fails acceptance. |
-| `gpt-6-astra` | `medium` | Design discussion, architecture second opinion, root-cause hypotheses before you act. |
-| `gemini-4-argon-medium` | in ID | Judgment on images, PDFs, audio, or video: find defects, rate against a spec, give design opinions; media tasks Hydrogen fails; second design opinion alongside Astra for high-stakes designs (concurrency, data integrity, security). |
+| `gpt-6-astra` | `medium` | Advisor with Argon: design discussion and second opinions; root-cause hypotheses before you act. |
+| `gemini-4-argon-medium` | in ID | Advisor with Astra; judgment on images, PDFs, audio, or video: find defects, rate against a spec; media tasks Hydrogen fails. |
 | `gemini-4-hydrogen-medium` | in ID | Multimodal extraction, the default for media: transcription, timestamped descriptions of video or frames, data read from images or PDFs into structured notes; mechanical edits: renames, format conversion, boilerplate, tests that follow examples. |
 | `gemini-4-hydrogen-high` | in ID | The above when medium fails acceptance or the task is clearly hard. |
 
