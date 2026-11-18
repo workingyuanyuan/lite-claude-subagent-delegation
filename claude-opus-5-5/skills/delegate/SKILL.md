@@ -14,9 +14,9 @@ Before building from a new design (a new project, feature, or redesign; not smal
 | Model ID | Effort | Task fit |
 | --- | --- | --- |
 | Agent tool `opus` | `medium` | Merge-bound code too large for your context; otherwise write it yourself. |
-| `gpt-6.1-sol` | `medium` | Review of code you wrote; non-merged backend work: repro scripts, load tests, one-off tools, backend investigation. |
-| `gpt-6.1-sol` | `high` | Large or risky diffs, or when medium fails acceptance. |
-| `gpt-6-astra` | `medium` | Advisor with Argon: design discussion and second opinions; root-cause hypotheses before you act. |
+| `gpt-6.2-sol` | `medium` | Review of code you wrote; non-merged backend work: repro scripts, load tests, one-off tools, backend investigation. |
+| `gpt-6.2-sol` | `high` | Large or risky diffs, or when medium fails acceptance. |
+| `gpt-6.2-astra` | `medium` | Advisor with Argon: design discussion and second opinions; root-cause hypotheses before you act. |
 | `gemini-4-argon-medium` | in ID | Advisor with Astra; judgment on images, PDFs, audio, or video: find defects, rate against a spec; media tasks Hydrogen fails. |
 | `gemini-4-hydrogen-medium` | in ID | Multimodal extraction, the default for media: transcription, timestamped descriptions of video or frames, data read from images or PDFs into structured notes; mechanical edits: renames, format conversion, boilerplate, tests that follow examples. |
 | `gemini-4-hydrogen-high` | in ID | The above when medium fails acceptance or the task is clearly hard. |

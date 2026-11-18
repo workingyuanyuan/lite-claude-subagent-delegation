@@ -62,9 +62,9 @@ Before delivering a design or merge-bound code, and whenever delegating would sa
 | --- | --- | --- |
 | Opus（Agent tool） | `medium` | 要 merge 但大到會吃滿主代理 context 的程式碼；其餘由主代理自己寫 |
 | Fable（Agent tool，僅 Opus 主代理） | `medium` | 搭建前與 Astra、Argon 並行的第三份設計意見；不接實作 |
-| `gpt-6.1-sol` | `medium` | 主代理寫完後的 code review；不 merge 的後端工作 |
-| `gpt-6.1-sol` | `high` | 大型或高風險 diff，或 medium 未通過驗收 |
-| `gpt-6-astra` | `medium` | 搭建前的設計討論與第二意見；動手前的根因假設 |
+| `gpt-6.2-sol` | `medium` | 主代理寫完後的 code review；不 merge 的後端工作 |
+| `gpt-6.2-sol` | `high` | 大型或高風險 diff，或 medium 未通過驗收 |
+| `gpt-6.2-astra` | `medium` | 搭建前的設計討論與第二意見；動手前的根因假設 |
 | `gemini-4-argon-medium` | ID 內 | 搭建前與 Astra 並行的設計意見；對圖片、PDF、影音做判斷；Hydrogen 做不好的媒體任務 |
 | `gemini-4-hydrogen-medium` | ID 內 | 多模態抽取（媒體任務的預設） |
 | `gemini-4-hydrogen-high` | ID 內 | 機械性程式任務；medium 未通過驗收或明顯困難的抽取 |

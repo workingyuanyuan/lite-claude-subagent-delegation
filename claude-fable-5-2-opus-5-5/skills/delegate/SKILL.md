@@ -17,9 +17,9 @@ This roster is for a Claude Fable 5.2 or Claude Opus 5.5 main agent; your system
 | --- | --- | --- |
 | Agent tool `opus` | `medium` | Merge-bound code too large for your context; otherwise write it yourself. |
 | Agent tool `fable`, only when you are Opus | `medium` | Advisor with Astra and Argon: design discussion and second opinions. Advisor only; do not send it implementation work. |
-| `gpt-6.1-sol` | `medium` | Review of code you wrote; non-merged backend work: repro scripts, load tests, one-off tools, backend investigation. |
-| `gpt-6.1-sol` | `high` | Large or risky diffs, or when medium fails acceptance. |
-| `gpt-6-astra` | `medium` | Advisor with Argon: design discussion and second opinions; root-cause hypotheses before you act. |
+| `gpt-6.2-sol` | `medium` | Review of code you wrote; non-merged backend work: repro scripts, load tests, one-off tools, backend investigation. |
+| `gpt-6.2-sol` | `high` | Large or risky diffs, or when medium fails acceptance. |
+| `gpt-6.2-astra` | `medium` | Advisor with Argon: design discussion and second opinions; root-cause hypotheses before you act. |
 | `gemini-4-argon-medium` | in ID | Advisor with Astra; judgment on images, PDFs, audio, or video: find defects, rate against a spec; media tasks Hydrogen fails. |
 | `gemini-4-hydrogen-medium` | in ID | Multimodal extraction, the default for media: transcription, timestamped descriptions of video or frames, data read from images or PDFs into structured notes. |
 | `gemini-4-hydrogen-high` | in ID | Mechanical edits: renames, format conversion, boilerplate, tests that follow examples; multimodal extraction when medium fails acceptance or the task is clearly hard. |
