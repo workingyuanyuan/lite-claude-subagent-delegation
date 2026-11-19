@@ -24,33 +24,38 @@
 - **其他模型當主代理**：skill 要求先告知使用者沒有對應名冊（Astra 建議），避免名冊被套用到沒評估過的主代理。
 
 ## 名冊的決定
-- **要 merge 的程式碼由主代理寫，寫完由 Sol 審查。** 前一版的依據是 2026-10-25 快照：Opus 5.5 在 Frontier Code 1.1（衡量寫出可 merge 程式碼的能力）得分最高（54.6）；GPT 模型後端能力強、擅長 review。新快照改用 Frontier Code 2.0，最高的是 Fable 5.2 high（46.2），Opus medium 是 31.4。新快照沒有衡量 review 品質的項目，Fable 當主代理時 Sol 審查的價值尚未實測。
-- **大型實作一律交給 Opus medium subagent，兩個主代理都一樣**（2026-11-17，使用者決定）：Frontier Code 2.0 上 Opus medium（31.4）低於 Fable medium（38.8）、Hydrogen high（38.2）、Astra（37.3）、Sol high（35.1）。Astra、Argon 都建議 Fable 主代理改用 Fable medium subagent，並指出 Opus 主代理維持 Opus subagent 與新分數不符；使用者決定兩者都用 Opus medium。
-- **Opus 主代理加 Fable 5.2 medium 當第三位 advisor**（2026-11-17，使用者決定）：搭建前與 Astra、Argon 一起平行、唯讀詢問，用 Agent tool（`model: fable`、`effort: medium`）。Fable medium 在快照中除 GDP.pdf 外都高於 Opus medium，是比主代理強的模型給意見，不是同模型的第二意見。只當 advisor，不接實作。尚未實測。
-- **Fable 主代理不設 Claude advisor**（主代理提案，Astra、Argon 意見一致）：另一個 Fable 是同模型的第二意見，只剩隔離 context 的價值（前一版「不設 Opus advisor」的理由相同）。Opus medium 在快照中除 GDP.pdf 外都低於 Fable medium，又同屬 Claude，不如 GPT、Gemini 能提供不同家族的觀點。
-- **不選 GPT-6 Luna。** 同定位的 Gemini 4 Hydrogen（前代 Gemini 3.8 Flash 已勝過 Luna）較合適；Gemini 適合委派的任務較窄、額度不容易用完，性價比更好。
-- **Gemini 的定位**：擅長多模態（PNG/PDF/WAV/MP4）。Hydrogen 也接機械性程式任務，用來分流 GPT 額度。
+文中「11/17 快照」指前一份分數快照（含 Opus medium、Hydrogen、Argon、Fable high、GPT-6.1 Sol、GPT-6 Astra），已被文末的 2026-11-19 快照取代，舊表見 git 歷史。
+- **要 merge 的程式碼由主代理寫，寫完由 Sol 審查。** 最初的依據是 2026-10-25 快照：Opus 5.5 在 Frontier Code 1.1（衡量寫出可 merge 程式碼的能力）得分最高（54.6）；GPT 模型後端能力強、擅長 review。快照沒有衡量 review 品質的項目，Fable 當主代理時 Sol 審查的價值尚未實測。
+- **大型實作交給 Opus high subagent，兩個主代理都一樣**（2026-11-19，使用者決定）：11/17 使用者不採 Astra、Argon 的建議（Fable 主代理改用 Fable medium subagent），決定兩者都用 Opus medium。11/19 三位 advisor 都指出新分數讓 Opus medium 的依據更弱（Frontier Code 2.0：31.4），使用者改為 Opus high（36.3），仍低於 Astra（42.2）、Fable medium（38.8）、Sol（38.3）、Neon（38.2）。
+- **Gemini 只留 Neon medium 一列**（2026-11-19，使用者決定）：取代 Hydrogen medium、Hydrogen high、Argon medium 三列，接手設計 advisor、媒體抽取與判斷、機械性編輯。
+  - 刪 Hydrogen：與 Neon 共用額度（使用者提供）；Neon medium 在 8 項全部不低於 11/17 快照的 Hydrogen high（Frontier Code 2.0 同為 38.2，GDP.pdf 32.8 對 30.0），也不低於 Hydrogen medium。
+  - 刪 Argon：已是上一代模型。Neon medium 在 6 項高於 Argon medium（HLE-Diamond 63.6 對 42.5、Frontier Code 2.0 38.2 對 24.4、AA-Omniscience 57.9 對 49.0、GDP.pdf 32.8 對 25.6、AutomationBench 53.3 對 50.1、Terminal-Bench-Science 54.8 對 48.6），Argon 只在 AA-Briefcase（62.6 對 53.2）和 Terminal-Bench 4.0（55.1 對 54.5）較高。Argon 有獨立額度，`agy` 仍可用，但不在名冊。
+  - advisor 意見：三位都同意 Neon 接 Gemini 的 advisor 席位（Astra 要求先實測）。分歧：Argon 的去留（Astra 留作 Neon 額度用完時的備援；Argon、Neon 主張移出名冊）、Hydrogen 的去留（Astra 兩列都留到 Neon 通過實測；Argon 留 medium 做抽取；Neon 全刪）。由使用者決定。
+- **Sol 只留 medium 一列，承接原 Sol high 的工作；Astra 只當 advisor，不接執行實作**（2026-11-19，使用者決定）：Astra 的額度消耗比 Sol 高很多（使用者提供），所以即使 Astra medium 在 6 項高於 Sol medium（Frontier Code 2.0 42.2 對 38.3、Terminal-Bench-Science 74.8 對 60.5），大型或高風險 diff 的審查仍交給 Sol medium。GPT-6.2 Sol medium 在 Frontier Code 2.0（38.3 對 35.1）、Terminal-Bench 4.0（56.1 對 51.5）、Terminal-Bench-Science（60.5 對 46.2）、AutomationBench（40.2 對 33.2）高於 11/17 快照的 GPT-6.1 Sol high，其餘 4 項略低（差 0.9 到 2.8）。Astra、Neon 曾建議把原 Sol high 的工作交給 Astra medium，Argon 建議保留 Sol high；使用者因額度不採。
+- **Opus 主代理加 Fable 5.2 medium 當第三位 advisor**（2026-11-17，使用者決定）：搭建前與 Astra、Neon 一起平行、唯讀詢問，用 Agent tool（`model: fable`、`effort: medium`）。Fable medium 在 11/17 快照除 GDP.pdf 外都高於 Opus medium；對新快照的 Opus high 也在 6 項較高（GDP.pdf、Terminal-Bench 4.0 較低）。是比主代理強的模型給意見，不是同模型的第二意見。只當 advisor，不接實作。尚未實測。
+- **Fable 主代理不設 Claude advisor**（主代理提案，11/17 Astra、Argon 意見一致）：另一個 Fable 是同模型的第二意見，只剩隔離 context 的價值（前一版「不設 Opus advisor」的理由相同）。Opus 多數項目低於 Fable medium，又同屬 Claude，不如 GPT、Gemini 能提供不同家族的觀點。
+- **不選 GPT-6 Luna。** 輕量任務由 Gemini 承接（原本是 Hydrogen，現在是 Neon）；Gemini 適合委派的任務較窄、額度不容易用完，性價比更好。
+- **Gemini 的定位**：擅長多模態（PNG/PDF/WAV/MP4）。Neon 也接機械性程式任務，用來分流 GPT 額度。
 - **Sonnet** 目前不在名冊；之後若加入，算執行任務的角色（Agent tool 或 agy 的 `claude-sonnet-5-5-*`）。
 - **Claude 角色用 Agent tool**，不用 agy 的 `claude-opus-5-5-*`：共用 Claude Code 的工具、權限、MCP，結果直接回到主代理。
 
 ## effort 的選法
 - 優先用供應商推薦的預設值，或 Quality vs Cost 圖上性價比突出的選項。
-- Argon 預設是 medium，medium 就夠。
-- Sol 先用 medium，沒通過驗收或任務明顯困難才升 high。
-- **Hydrogen 的媒體抽取先用 medium，機械性程式任務直接用 high**（2026-11-17，使用者決定）：Hydrogen medium 在 Terminal-Bench 4.0（29.3）、Terminal-Bench-Science 0.1（15.2）、Frontier Code 2.0（28.2）明顯低於 high（54.0、41.4、38.2）。GDP.pdf 則是 medium 32.8 全表最高，高於 high 的 30.0。Astra、Argon 都指出這點。Gemini 額度不容易用完，升 high 的成本低。
+- 名冊每個模型只列一個 effort（2026-11-19）：Sol、Astra、Neon、Fable 用 medium，Opus 用 high。新快照只有這 5 個組合的分數，沒有 Sol high、Neon high、Fable high。
+- **skill 不再有升 effort 的選項**（2026-11-19，使用者決定）：完全不用 Sol high，其他模型也只用名冊上的 effort。結果未通過驗收時先釐清 brief，仍不行就由主代理接手。
 
 ## 委派規則的決定
 - 驗證成本接近自己做的成本 → 不委派（已和使用者確認）。
 - 委派結果一律視為未驗證的意見。前例：Gemini 曾在要求有證據支撐的報告中捏造模型、分數和日期。
 - 若發現每次都需要主代理完整驗證、實際品質沒提升，要重新和使用者討論委派規則。紀錄在 `~/.local/state/delegation-log/<專案>/`，可回頭檢視。
 - 紀錄不放 `~/.claude/` 底下，避免寫入設定目錄時跳權限提示。
-- **結果不足時的處理順序**（2026-11-10，參考 claude.dev〈Which Claude model should you build with?〉）：先確認 worker 能自己跑驗收（測試、build、腳本），再釐清 brief 或升 effort；缺的是知識或能力時改派較強的模型，因為升 effort 補不了這些。brief 的 acceptance check 也因此要求是 worker 能自己執行的檢查。
-- **多模態預設 Hydrogen，Argon 只做判斷**（2026-11-14）：回顧紀錄，Gemini 共 45 次呼叫（Argon 24、Flash 21、Hydrogen 0）。多數 Argon 是視覺／音訊審查，符合原表；但 radar-repro 影片逆向分析（逐段輸出 storyboard JSON，屬擷取）連派 5 次 Argon。原因是 Argon 列「Review or opinions」範圍太寬，Hydrogen 列只寫「Multimodal extraction」沒有例子。→ Hydrogen 列寫明是媒體任務的預設，並列出轉錄、影片／影格時間軸描述、從圖片或 PDF 讀資料；Argon 列改成「對媒體做判斷」，並接手 Hydrogen 失敗的媒體任務。
-- **搭建前固定問兩位 advisor**（2026-11-15）：新專案、新功能或改版（不含小改動）開始搭建前，一律平行、唯讀地問 Astra 和 Argon，把採納點和分歧呈報使用者，分歧由使用者決定後才動工。不再區分「設計找 Astra、高風險或 UX 才加 Argon」，主代理不必判斷該問誰，省 context，也提升設計品質（使用者決定）。來源：11/06 使用者在 phone-disassembly 要求「在開始搭建前先向其他代理詢問第二意見」，原本只存成該專案記憶；11/15 記憶整理時被當成與 skill 重複刪除，才發現 skill 沒有這條規則。兩人互補的實例見下方「設計審查加派 Argon」。2026-11-17 起 Opus 主代理另加 Fable，見「名冊的決定」。
+- **結果不足時的處理順序**（2026-11-10，參考 claude.dev〈Which Claude model should you build with?〉）：先確認 worker 能自己跑驗收（測試、build、腳本），再釐清 brief 或升 effort；缺的是知識或能力時改派較強的模型，因為升 effort 補不了這些。brief 的 acceptance check 也因此要求是 worker 能自己執行的檢查。2026-11-19 起拿掉升 effort 和改派較強模型這兩步（見「effort 的選法」）：名冊每個模型只剩一個 effort，Astra 不接實作，剩下的處理是釐清 brief 或由主代理接手。
+- **多模態預設 Hydrogen，Argon 只做判斷**（2026-11-14）：回顧紀錄，Gemini 共 45 次呼叫（Argon 24、Flash 21、Hydrogen 0）。多數 Argon 是視覺／音訊審查，符合原表；但 radar-repro 影片逆向分析（逐段輸出 storyboard JSON，屬擷取）連派 5 次 Argon。原因是 Argon 列「Review or opinions」範圍太寬，Hydrogen 列只寫「Multimodal extraction」沒有例子。→ Hydrogen 列寫明是媒體任務的預設，並列出轉錄、影片／影格時間軸描述、從圖片或 PDF 讀資料；Argon 列改成「對媒體做判斷」，並接手 Hydrogen 失敗的媒體任務。2026-11-19 起兩者都由 Neon 一列承接，抽取與判斷不再需要選模型，Neon 列仍保留這些例子。
+- **搭建前固定問兩位 advisor**（2026-11-15）：新專案、新功能或改版（不含小改動）開始搭建前，一律平行、唯讀地問 Astra 和 Argon，把採納點和分歧呈報使用者，分歧由使用者決定後才動工。不再區分「設計找 Astra、高風險或 UX 才加 Argon」，主代理不必判斷該問誰，省 context，也提升設計品質（使用者決定）。來源：11/06 使用者在 phone-disassembly 要求「在開始搭建前先向其他代理詢問第二意見」，原本只存成該專案記憶；11/15 記憶整理時被當成與 skill 重複刪除，才發現 skill 沒有這條規則。兩人互補的實例見下方「設計審查加派 Argon」。2026-11-17 起 Opus 主代理另加 Fable，2026-11-19 起 Gemini 的席位由 Argon 換成 Neon，見「名冊的決定」。
 - **連續依賴步驟不委派**（同一篇）：彼此依賴的步驟放得進主代理 context 時，拆分和合併的成本會比省下的多。超出 context 的大型工作仍然照名冊委派。
 
 ## 實測紀錄（2026-10-25，agy 1.4.7、codex-cli 0.163）
-以下都是 Opus 5.5 當主代理時的實測，文中的 Flash 是當時名冊裡的 Gemini 3.8 Flash。
+以下都是 Opus 5.5 當主代理時的實測，文中的 Flash 是當時名冊裡的 Gemini 3.8 Flash；Argon 已於 2026-11-19 移出名冊。
 - **`/boost` 在 `agy -p` 下會展開**：orchestrator 選 Delegation routine，派 DeepCoder，底下再開子代理。9 行的 race condition 修好了，但花 7 分 35 秒、輸出約 2.7 萬 token，而且修法過度設計（多加 property、參數、RLock），不是可直接 merge 的 diff。→ 原本只保留給根因調查（DeepInvestigator 路線），後來刪除，見下方 t8。
 - **`/browser` 在 `agy -p` 下也會展開**，但 WSL 沒有 Chrome，子代理連不上 DevTools。主代理沒有回報失敗，改讀 HTML 原始碼推出答案並當作成功回覆。→ 瀏覽器任務先移出 skill；brief 範本加入「失敗或換方法要在開頭明講」。要恢復，需在 WSL 安裝 Chrome，並在第一次連線時手動允許遠端偵錯。
 - `agy --output-format json` 的 `status` 在子代理失敗時仍是 `SUCCESS`，不能依賴它判斷成敗。
@@ -61,22 +66,26 @@
 - **小改動不強制審查**：t8 的一行修正沒有觸發「交付要 merge 的程式碼前讀 skill」的檢查點，但驗證完整，審查價值低。使用者決定維持現狀，不改成「任何 commit 前」。
 - `codex exec -s read-only -o <路徑>` 可以寫到工作目錄外（`-o` 由 CLI 寫，不受 sandbox 限制）。
 
+## 實測紀錄（2026-11-19，agy 1.5.12、codex-cli 0.170.0）
+- **同一份名冊修改 brief 平行問 Astra、Argon、Neon**（Fable 5.2 主代理）：三份都正常完成。Neon 引用的分數逐項核對正確，建議的完整度與 Argon 相當；Neon 沒有先查 `agy` 的模型 ID（brief 也沒有給）。只有這一次樣本。
+
 ## 待觀察
 - 新版 skill 尚未實測：Fable 與 Opus 主代理是否都載入 skill、Opus 是否會加問 Fable、Fable 是否不會加問；Sol 審查是否仍找得到 Fable 漏掉的問題。
-- Fable 與 Opus 的相對額度消耗未知。
-- Argon 接手 Hydrogen 失敗的媒體任務：GDP.pdf 上 Argon medium（25.6）低於 Hydrogen medium（32.8）和 high（30.0）。純 PDF 讀取失敗時，Argon 不一定比 Hydrogen high 好（Argon 自己指出）。目前 skill 未改。
+- Fable 與 Opus 的相對額度消耗未知；Opus 由 medium 升 high 後的額度消耗也未知。
+- Neon 的設計意見與媒體判斷品質未實測：benchmark 沒有衡量這兩項。便宜的試法是用委派紀錄裡的舊任務（租約 DESIGN.md、一個媒體判斷任務）讓 Neon 重跑，和 Argon 當時的結果比對。品質不如 Argon 時，重新討論是否把 Argon 加回來。
+- Sol medium 審查大型或高風險 diff 的品質未實測；GPT-6.2 Sol high 沒有分數。
 
-## 分數快照（2026-11-17，8 個共同 benchmark）
+## 分數快照（2026-11-19，8 個共同 benchmark，5 個組合）
 
-| Benchmark | GPT-6.1 Sol · high | GPT-6 Astra · medium | Claude Fable 5.2 · high | Claude Opus 5.5 · medium | Gemini 4 Hydrogen · high | Gemini 4 Argon · medium | GPT-6.1 Sol · medium | Gemini 4 Hydrogen · medium | Claude Fable 5.2 · medium |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| AA-Briefcase | 49.1 | 47.5 | 62.9 | 57.0 | 52.4 | 62.6 | 44.0 | 42.6 | 61.0 |
-| AA-Omniscience | 60.4 | 59.6 | 77.2 | 63.9 | 48.2 | 49.0 | 59.6 | 48.3 | 77.0 |
-| AutomationBench | 33.2 | 34.1 | 44.3 | 29.5 | 51.1 | 50.1 | 31.7 | 46.7 | 40.2 |
-| Frontier Code 2.0 | 35.1 | 37.3 | 46.2 | 31.4 | 38.2 | 24.4 | 30.3 | 28.2 | 38.8 |
-| GDP.pdf | 32.0 | 30.4 | 21.8 | 25.6 | 30.0 | 25.6 | 30.0 | 32.8 | 23.8 |
-| HLE-Diamond | 51.9 | 52.7 | 73.8 | 51.4 | 54.9 | 42.5 | 46.0 | 47.7 | 66.3 |
-| Terminal-Bench 4.0 | 51.5 | 49.5 | 65.2 | 52.5 | 54.0 | 55.1 | 48.0 | 29.3 | 55.1 |
-| Terminal-Bench-Science 0.1 | 46.2 | 53.3 | 70.0 | 43.3 | 41.4 | 48.6 | 37.1 | 15.2 | 60.5 |
+| Benchmark | GPT-6.2 Astra · medium | GPT-6.2 Sol · medium | Claude Fable 5.2 · medium | Claude Opus 5.5 · high | Gemini 4 Neon · medium |
+| --- | --- | --- | --- | --- | --- |
+| AA-Briefcase | 47.7 | 48.2 | 61.0 | 58.9 | 53.2 |
+| AA-Omniscience | 64.2 | 59.2 | 77.0 | 64.8 | 57.9 |
+| AutomationBench | 43.8 | 40.2 | 40.2 | 33.0 | 53.3 |
+| Frontier Code 2.0 | 42.2 | 38.3 | 38.8 | 36.3 | 38.2 |
+| GDP.pdf | 28.4 | 29.2 | 23.8 | 28.8 | 32.8 |
+| HLE-Diamond | 56.0 | 50.7 | 66.3 | 55.6 | 63.6 |
+| Terminal-Bench 4.0 | 58.6 | 56.1 | 55.1 | 56.6 | 54.5 |
+| Terminal-Bench-Science 0.1 | 74.8 | 60.5 | 60.5 | 49.0 | 54.8 |
 
 來源：Frontier-Model-Doh-Choo-choo 專案的網頁。skill 本身不依賴這個專案。
